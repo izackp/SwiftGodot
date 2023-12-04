@@ -9,39 +9,57 @@ import Foundation
 import ExtensionApi
 
 var args = CommandLine.arguments
-/*
-func convertToWindowsPath(unixPath: String) -> String {
-    var windowsPath = unixPath
-    if let firstBackslashRange = windowsPath.range(of: "/") {
-        windowsPath.replaceSubrange(firstBackslashRange, with: "Y:/")
-    }
-    return windowsPath
-}
 
 let jsonFileB = args.count > 1 ? args [1] : "/Users/miguel/cvs/godot-master/extension_api.json"
 let generatorOutputB = args.count > 2 ? args [2] : "/Users/miguel/cvs/SwiftGodot-DEBUG"
 let docRootB =  args.count > 3 ? args [3] : "/Users/miguel/cvs/godot-master/doc"
 
 #if os(Windows)
+func extractDriveLetter(fromPath path: String) -> String? {
+    let components = path.components(separatedBy: ":")
+    
+    if components.count >= 2, let driveLetter = components.first, driveLetter.count == 1 {
+        return driveLetter.uppercased()
+    }
+    
+    return nil
+}
+
+
+let fileManager = FileManager.default
+let currentDirectory = fileManager.currentDirectoryPath
+let driveLetter = extractDriveLetter(fromPath: currentDirectory)!
+
+func convertToWindowsPath(unixPath: String) -> String {
+    var windowsPath = unixPath
+    if let firstBackslashRange = windowsPath.range(of: "/") {
+        windowsPath.replaceSubrange(firstBackslashRange, with: "\(driveLetter):/")
+    }
+    return windowsPath
+}
+
+
 let jsonFile = convertToWindowsPath(unixPath: jsonFileB)
 var generatorOutput = convertToWindowsPath(unixPath: generatorOutputB)
 var docRoot = convertToWindowsPath(unixPath: docRootB)
 #else
-
+let jsonFile = jsonFileB
+var generatorOutput = generatorOutputB
+var docRoot = docRootB
 #endif
 
 #if os(Windows)
 let outputDir = args.count > 2 ? convertToWindowsPath(unixPath: args [2]) : generatorOutput
 #else
 let outputDir = args.count > 2 ? args [2] : generatorOutput
-#endif*/
-
+#endif
+/*
 let jsonFile = args.count > 1 ? args [1] : "/Users/miguel/cvs/godot-master/extension_api.json"
 let generatorOutput = args.count > 2 ? args [2] : "/Users/miguel/cvs/SwiftGodot-DEBUG"
 let docRoot =  args.count > 3 ? args [3] : "/Users/miguel/cvs/godot-master/doc"
 
 let outputDir = args.count > 2 ? args [2] : generatorOutput
-
+*/
 // IF we want a single file, or one file per type
 var singleFile = args.contains("--singlefile")
 
