@@ -24,7 +24,6 @@ var products: [Product] = [
             "ExtensionApi",
             "ExtensionApiJson"
         ]),
-    .plugin(name: "CodeGeneratorPlugin", targets: ["CodeGeneratorPlugin"]),
 ]
 
 // Macros aren't supported on Windows before 5.9.1 and this sample uses them
@@ -56,31 +55,12 @@ var targets: [Target] = [
         sources: ["ExtensionApiJson.swift"],
         resources: [.process("extension_api.json")]),
     
-    // The generator takes Godot's JSON-based API description as input and
-    // produces Swift API bindings that can be used to call into Godot.
-    .executableTarget(
-        name: "Generator",
-        dependencies: [
-            "XMLCoder",
-            "ExtensionApi",
-        ],
-        path: "Generator",
-        exclude: ["README.md"]),
-    
-    // This is a build-time plugin that invokes the generator and produces
-    // the bindings that are compiled into SwiftGodot
-        .plugin(
-            name: "CodeGeneratorPlugin",
-            capability: .buildTool(),
-            dependencies: ["Generator"]
-        ),
-    
     // This allows the Swift code to call into the Godot bridge API (GDExtension)
     .target(
         name: "GDExtension"),
 ]
 
-var swiftGodotPlugins: [Target.PluginUsage] = ["CodeGeneratorPlugin"]
+var swiftGodotPlugins: [Target.PluginUsage] = []
 
 // Macros aren't supported on Windows before 5.9.1
 #if !(os(Windows) && swift(<5.9.1))
