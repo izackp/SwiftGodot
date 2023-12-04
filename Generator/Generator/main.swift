@@ -9,10 +9,36 @@ import Foundation
 import ExtensionApi
 
 var args = CommandLine.arguments
+/*
+func convertToWindowsPath(unixPath: String) -> String {
+    var windowsPath = unixPath
+    if let firstBackslashRange = windowsPath.range(of: "/") {
+        windowsPath.replaceSubrange(firstBackslashRange, with: "Y:/")
+    }
+    return windowsPath
+}
+
+let jsonFileB = args.count > 1 ? args [1] : "/Users/miguel/cvs/godot-master/extension_api.json"
+let generatorOutputB = args.count > 2 ? args [2] : "/Users/miguel/cvs/SwiftGodot-DEBUG"
+let docRootB =  args.count > 3 ? args [3] : "/Users/miguel/cvs/godot-master/doc"
+
+#if os(Windows)
+let jsonFile = convertToWindowsPath(unixPath: jsonFileB)
+var generatorOutput = convertToWindowsPath(unixPath: generatorOutputB)
+var docRoot = convertToWindowsPath(unixPath: docRootB)
+#else
+
+#endif
+
+#if os(Windows)
+let outputDir = args.count > 2 ? convertToWindowsPath(unixPath: args [2]) : generatorOutput
+#else
+let outputDir = args.count > 2 ? args [2] : generatorOutput
+#endif*/
 
 let jsonFile = args.count > 1 ? args [1] : "/Users/miguel/cvs/godot-master/extension_api.json"
-var generatorOutput = args.count > 2 ? args [2] : "/Users/miguel/cvs/SwiftGodot-DEBUG"
-var docRoot =  args.count > 3 ? args [3] : "/Users/miguel/cvs/godot-master/doc"
+let generatorOutput = args.count > 2 ? args [2] : "/Users/miguel/cvs/SwiftGodot-DEBUG"
+let docRoot =  args.count > 3 ? args [3] : "/Users/miguel/cvs/godot-master/doc"
 
 let outputDir = args.count > 2 ? args [2] : generatorOutput
 

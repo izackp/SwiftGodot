@@ -8,41 +8,72 @@
 import Foundation
 import PackagePlugin
 
+/*
+@main
+struct MyPlugin: BuildToolPlugin {
+    
+    func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
+        guard let target = target.sourceModule else { return [] }
+        let inputFiles = target.sourceFiles.filter({ $0.path.extension == "dat" })
+        return try inputFiles.map {
+            let inputFile = $0
+            let inputPath = inputFile.path
+            let outputName = inputPath.stem + ".swift"
+            let outputPath = context.pluginWorkDirectory.appending(outputName)
+            return .buildCommand(
+                displayName: "Generating \(outputName) from \(inputPath.lastComponent)",
+                executable: try context.tool(named: "SomeTool").path,
+                arguments: [ "--verbose", "\(inputPath)", "\(outputPath)" ],
+                inputFiles: [ inputPath, ],
+                outputFiles: [ outputPath ]
+            )
+        }
+    }
+}
+*/
+
 /// Generates the API for the SwiftGodot from the Godot exported Json API
 @main struct SwiftCodeGeneratorPlugin: BuildToolPlugin {
     func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-        // Configure the commands to write to a "GeneratedSources" directory.
-        let genSourcesDir = context.pluginWorkDirectory.appending("GeneratedSources")
-
         // We only generate commands for source targets.
+        let genSourcesDir = context.pluginWorkDirectory.appending("GeneratedSources")
         let generator: Path = try context.tool(named: "Generator").path
 
         let api = context.package.directory.appending(["Sources", "ExtensionApi", "extension_api.json"])
-        
-        var arguments: [CustomStringConvertible] = [ api, genSourcesDir ]
+        let extApiFile = api
+        var arguments: [CustomStringConvertible] = [ extApiFile, genSourcesDir ]
         var outputFiles: [Path] = []
         #if os(Windows)
         // Windows has 32K limit on CreateProcess argument length, SPM currently doesn't handle it well
-        outputFiles.append(genSourcesDir.appending(subpath: "Generated.swift"))
+        outputFiles.append(genSourcesDir.appending(subpath: "generated.swift"))
         arguments.append(context.package.directory.appending(subpath: "doc"))
         arguments.append("--singlefile")
         let cmd: Command = Command.prebuildCommand(
-            displayName: "Generating Swift API from \(api) to \(genSourcesDir)",
+            displayName: "Generating Swift API from \(extApiFile) to \(genSourcesDir)",
             executable: generator,
             arguments: arguments,
             outputFilesDirectory: genSourcesDir)
+        
+        //cmd2 makes something get mad that generated.swift doesn't exist so we have the preBuildCommand too
+        let cmd2: Command = Command.buildCommand(
+            displayName: "Generating Swift API from \(extApiFile) to \(genSourcesDir)",
+            executable: generator,
+            arguments: arguments,
+            inputFiles: [extApiFile],
+            outputFiles: outputFiles)
+        return [cmd, cmd2]
         #else
         outputFiles.append (contentsOf: knownBuiltin.map { genSourcesDir.appending(["generated-builtin", $0])})
         outputFiles.append (contentsOf: known.map { genSourcesDir.appending(["generated", $0])})
         let cmd: Command = Command.buildCommand(
-            displayName: "Generating Swift API from \(api) to \(genSourcesDir)",
+            displayName: "Generating Swift API from \(extApiFile) to \(genSourcesDir)",
             executable: generator,
             arguments: arguments,
-            inputFiles: [api],
+            inputFiles: [extApiFile],
             outputFiles: outputFiles)
+        return [cmd]
         #endif
         
-        return [cmd]
     }
 }
 
